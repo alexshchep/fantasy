@@ -18,7 +18,8 @@ import nhlqueries
 import genetic_algo
 import fantasy_html_to_mysql as fhtm
 
-def point_function(position, goals, assists, sog, bs, shp, shootout, win, saves,ga, shutout, coef_arr_player = np.array([3,2,0.5,0.5,1,0.2,1.5] ), coef_arr_goalie = np.array([3,0.2,1,2])):
+def point_function(position, goals, assists, sog, bs, shp, shootout, win, saves,ga, shutout, coef_arr_player = np.array([3,2,0.5,0.5,1,0.2,1.5] ), 
+		   coef_arr_goalie = np.array([3,0.2,1,2])):
 	if goals >= 3:
 		hattrick = 1
 	else:
@@ -39,7 +40,8 @@ def playergames_ftpts(playergame, kingsposition):
 			win = 0
 		ftpts = point_function('G',0,0,0,0,0,0,win, playergame['SV'],playergame['GA'], playergame['SO'])
 	else:
-		ftpts = point_function(playergame['PlayerPosition'], playergame['Goals'], playergame['Assists'], playergame['Shots'], playergame['Blocks'], playergame['Goals_sh'] + playergame['Assists_sh'], 0, 0,0,0,0)
+		ftpts = point_function(playergame['PlayerPosition'], playergame['Goals'], playergame['Assists'], playergame['Shots'], playergame['Blocks'], 
+				       playergame['Goals_sh'] + playergame['Assists_sh'], 0, 0,0,0,0)
 	return(ftpts)
 	#position, goals, assists, sog, bs, shp, shootout, win, saves,ga, shutout
 
