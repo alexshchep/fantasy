@@ -62,7 +62,8 @@ def parseSoup(soup, gameid, firstid, season, playoffs):
 		attendance, arena, gameduration, gamedate = parseInformation(soup)
 
 		# retrieve players info
-		# skaterlist - ['name', 'gameid', 'teamfor', 'teamagainst', 'goals','assists', 'points', 'plus_minus', 'pim', 'goals_ev', 			'goals_pp', 'goals_sh','gw', 'assists_ev', 'assists_pp', 'assists_sh', 'shots', 'shot_percentage', 'shifts', 'toi']
+		# skaterlist - ['name', 'gameid', 'teamfor', 'teamagainst', 'goals','assists', 'points', 'plus_minus', 'pim', 'goals_ev',
+		# 'goals_pp', 'goals_sh','gw', 'assists_ev', 'assists_pp', 'assists_sh', 'shots', 'shot_percentage', 'shifts', 'toi']
 		awayskaterlist, awayscore, awaypim, awayshots = parseSkaters(soup, teamname = away, gameid = gameid, teamagainst = home, ahoflag = ahoflag_a)
 		awayadvancedlist = parseAdvanced(soup, away, gameid, ahoflag = ahoflag_a)
 		awaygoalielist = parseGoalies(soup, away, gameid, home, ahoflag = ahoflag_a)
@@ -72,7 +73,8 @@ def parseSoup(soup, gameid, firstid, season, playoffs):
 		# parse soup for Penalties
 		penaltylist = parsePenalty(soup)
 		goallist, shootoutlist, OT, SO = parseScoring(soup)
-		gameinfo = nhltuples.Game(gameid = gameid, away = away, home = home, date = gamedate, attendance = attendance, arena = arena, duration = gameduration, awayscore = awayscore, homescore = homescore, OT = OT, SO = SO)
+		gameinfo = nhltuples.Game(gameid = gameid, away = away, home = home, date = gamedate, attendance = attendance, arena = arena, duration = gameduration, 
+					  awayscore = awayscore, homescore = homescore, OT = OT, SO = SO)
 		if playoffs < gameinfo.date:
 			playoffs = 1
 		else:
@@ -114,7 +116,8 @@ def parseSoup(soup, gameid, firstid, season, playoffs):
 		penaltylist_todb(cur, penaltylist, gameid, (hometeamid, awayteamid))
 		print('wrote penatlies to the database..')
 
-		insertgameinfoq = """INSERT INTO GameStatistics (GameID, HomeTeamID, AwayTeamID, HomeGoals, AwayGoals, HomePIM, AwayPIM, HomeShots, AwayShots, Attendance, Duration) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s) ON DUPLICATE KEY UPDATE GameID = GameID;"""
+		insertgameinfoq = """INSERT INTO GameStatistics (GameID, HomeTeamID, AwayTeamID, HomeGoals, AwayGoals, HomePIM, AwayPIM, HomeShots, AwayShots, Attendance, 
+		Duration) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s) ON DUPLICATE KEY UPDATE GameID = GameID;"""
 		cur.execute(insertgameinfoq, (gameid, hometeamid, awayteamid, homescore, awayscore, homepim, awaypim, homeshots, awayshots, attendance, gameduration))
 		print('wrote gameinfo to the database..')
 		conn.commit()
@@ -131,35 +134,43 @@ def skaterlist_todb(cur, skaterlist, gameid, teamfor, teamagainst, gamedate):
 	# insert players into the players database
 	#insertplayersq = """INSERT INTO Players (FullName) VALUES (%s) ON DUPLICATE KEY UPDATE FullName = FullName;"""
 	# insert player game statistics into the playergames database
-	insertplayergamesq = """INSERT INTO PlayerGames(PlayerID, GameID, GameDate, TeamFor, TeamAgainst, Goals, Assists, Points, PlusMinus, TOI, Shots, PIM, Goals_ev, Goals_pp, Goals_sh, GW, Assists_ev, Assists_pp, Assists_sh, ShotPercentage, Shifts) VALUES(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s) ON DUPLICATE KEY UPDATE GameID = GameID;"""
+	insertplayergamesq = """INSERT INTO PlayerGames(PlayerID, GameID, GameDate, TeamFor, TeamAgainst, Goals, Assists, Points, PlusMinus, TOI, Shots, PIM, Goals_ev, 
+	Goals_pp, Goals_sh, GW, Assists_ev, Assists_pp, Assists_sh, ShotPercentage, Shifts) VALUES(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, 
+	%s, %s, %s) ON DUPLICATE KEY UPDATE GameID = GameID;"""
 	for skater in skaterlist:
 		if skater.name == 'TOTAL':
 			continue
 		cur.execute(nhlqueries.insertplayersq, [skater.name])
 		cur.execute(nhlqueries.selectplayerid, [skater.name])
 		skater_id = cur.fetchone()
-		cur.execute(insertplayergamesq, (skater_id, gameid, gamedate, teamfor, teamagainst, skater.goals, skater.assists, skater.points, skater.plus_minus, skater.toi, skater.shots, skater.pim, skater.goals_ev, skater.goals_pp, skater.goals_sh, skater.gw, skater.assists_ev, skater.assists_pp, skater.assists_sh, skater.shot_percentage, skater.shifts ))
+		cur.execute(insertplayergamesq, (skater_id, gameid, gamedate, teamfor, teamagainst, skater.goals, skater.assists, skater.points, skater.plus_minus, 
+						 skater.toi, skater.shots, skater.pim, skater.goals_ev, skater.goals_pp, skater.goals_sh, skater.gw, skater.assists_ev, 
+						 skater.assists_pp, skater.assists_sh, skater.shot_percentage, skater.shifts ))
 
 def advancedskater_todb(cur, skaterlist, gameid):
 	# update players with advanced stats
 #	['name', 'gameid', 'icf', 'satf', 'sata', 'cfpct', 'crel', 'zso', 'zsd', 'ozspct', 'hits', 'blocks']
-	updateadvancedplayersq = """UPDATE PlayerGames SET ICF = %s, SATF = %s, SATA = %s, CFpct = %s, CREL = %s, ZSO = %s, ZSD = %s, OZSpct = %s, Hits = %s, Blocks = %s WHERE GameID = %s and PlayerID = %s;"""
+	updateadvancedplayersq = """UPDATE PlayerGames SET ICF = %s, SATF = %s, SATA = %s, CFpct = %s, CREL = %s, ZSO = %s, ZSD = %s, OZSpct = %s, Hits = %s, 
+	Blocks = %s WHERE GameID = %s and PlayerID = %s;"""
         for skater in skaterlist:
 		cur.execute(nhlqueries.selectplayerid, [skater.name])
 		skaterid = cur.fetchone()
-		cur.execute(updateadvancedplayersq, (skater.icf, skater.satf, skater.sata, skater.cfpct, skater.crel, skater.zso, skater.zsd, skater.ozspct, skater.hits, skater.blocks, gameid, skaterid))
+		cur.execute(updateadvancedplayersq, (skater.icf, skater.satf, skater.sata, skater.cfpct, skater.crel, skater.zso, skater.zsd, skater.ozspct, 
+						     skater.hits, skater.blocks, gameid, skaterid))
 
 def goalielist_todb(cur, goalielist, gameid, teamfor, teamagainst, gamedate):
 #('GoalieGame', ['name', 'gameid', 'teamfor', 'teamagainst', 'result', 'ga', 'sa', 'sv', 'sv_pct', 'so', 'pim', 'toi'])
 	# insert goalies 
 	# insert players into the players database
 	#insertgoaliesq = """INSERT INTO Players (FullName, Goalie) VALUES (%s, 1) ON DUPLICATE KEY UPDATE FullName = FullName;"""
-	insertgoaliegamesq = """INSERT INTO GoalieGames(PlayerID, GameID, GameDate, TeamFor, TeamAgainst, Result, GA, SA, SV, SVpct, SO, TOI,PIM) VALUES(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s) ON DUPLICATE KEY UPDATE GameID = GameID;"""
+	insertgoaliegamesq = """INSERT INTO GoalieGames(PlayerID, GameID, GameDate, TeamFor, TeamAgainst, Result, GA, SA, SV, SVpct, SO, TOI,PIM) 
+	VALUES(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s) ON DUPLICATE KEY UPDATE GameID = GameID;"""
 	for goalie in goalielist:
 		cur.execute(nhlqueries.insertgoaliesq, [goalie.name])
 		cur.execute(nhlqueries.selectplayerid, [goalie.name])
 		goalieid = cur.fetchone()
-		cur.execute(insertgoaliegamesq, (goalieid, gameid, gamedate, teamfor, teamagainst, goalie.result, goalie.ga, goalie.sa, goalie.sv, goalie.sv_pct, goalie.so, goalie.toi, goalie.pim))
+		cur.execute(insertgoaliegamesq, (goalieid, gameid, gamedate, teamfor, teamagainst, goalie.result, goalie.ga, goalie.sa, goalie.sv, 
+						 goalie.sv_pct, goalie.so, goalie.toi, goalie.pim))
 
 def shootoutlist_todb(cur, shooterlist, gameid):
 	insertshootersq = """INSERT INTO Shootouts (GameID, PlayerID, GoalieID, Goal) VALUES(%s, %s, %s, %s) ON DUPLICATE KEY UPDATE GameID = GameID;"""
@@ -174,7 +185,8 @@ def shootoutlist_todb(cur, shooterlist, gameid):
 
 def goallist_todb(cur, goallist, gameid, teams):
 	# goallist = ['goal', 'gameid', 'assist', 'assist2', 'time', 'period', 'teamfor', 'situation']
-	insertgoalsq = """INSERT INTO Goals (Scorer, GameID, PrimaryAssist, SecondaryAssist, TeamFor, TeamAgainst, TimeGoal, Period, Situation) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s) ON DUPLICATE KEY UPDATE GameID = GameID;"""
+	insertgoalsq = """INSERT INTO Goals (Scorer, GameID, PrimaryAssist, SecondaryAssist, TeamFor, TeamAgainst, TimeGoal, Period, Situation) 
+	VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s) ON DUPLICATE KEY UPDATE GameID = GameID;"""
 	for goal in goallist:
 		# tuple of ids for scorer, primaryassist and secondary assist
 		cur.execute(nhlqueries.selectplayerid, [goal.goal])
@@ -193,7 +205,8 @@ def goallist_todb(cur, goallist, gameid, teams):
 		cur.execute(insertgoalsq, (scorer, gameid, primaryAssist, secondaryAssist, teamforid, teamagainstid, goal.time, goal.period, goal.situation))
 
 def penaltylist_todb(cur, penaltylist, gameid, teams):
-	insertpenaltiesq = """INSERT INTO Penalties (PlayerID, GameID, Minutes, Reason, TimePenalty, Period, TeamFor, TeamAgainst) VALUES(%s, %s, %s, %s, %s, %s, %s, %s) ON DUPLICATE KEY UPDATE GameID = GameID;"""
+	insertpenaltiesq = """INSERT INTO Penalties (PlayerID, GameID, Minutes, Reason, TimePenalty, Period, TeamFor, TeamAgainst) 
+	VALUES(%s, %s, %s, %s, %s, %s, %s, %s) ON DUPLICATE KEY UPDATE GameID = GameID;"""
 	for penalty in penaltylist:
 		cur.execute(nhlqueries.selectplayerid, [penalty.player])
 		playerid = cur.fetchone()
@@ -319,7 +332,8 @@ def parseScoring(soup):
 			if len(wordlist) > 2:
 				re_and = re.search(' and ', wordlist[2])
 				secondaryassist = wordlist[2][re_and.end():].strip()
-			goallist.append(nhltuples.Goal(goal = goalscorer, gameid = gameid, assist = primaryassist, assist2 = secondaryassist, time = goaltime, period = period, teamfor = teamfor, situation = situation))
+			goallist.append(nhltuples.Goal(goal = goalscorer, gameid = gameid, assist = primaryassist, assist2 = secondaryassist, 
+						       time = goaltime, period = period, teamfor = teamfor, situation = situation))
 	return goallist, shootoutlist, OT, SO
 	
 def parseShootout(row, gameid):
@@ -430,7 +444,10 @@ def parseSkaters(soup, teamname, gameid, teamagainst, ahoflag):
 #		print(name)
 		# find block shots
 		
-		skaterlist.append(nhltuples.PlayerGame(name = name, gameid = gameid, teamfor = teamfor, teamagainst = teamagainst, goals = goals, assists = assists, points = points, plus_minus = plus_minus, pim = pim, goals_ev = goals_ev, goals_pp = goals_pp, goals_sh = goals_sh, gw = gw, assists_ev = assists_ev, assists_pp = assists_pp, assists_sh = assists_sh, shots = shots, shot_percentage = shot_percentage, shifts = shifts, toi = toi)) 
+		skaterlist.append(nhltuples.PlayerGame(name = name, gameid = gameid, teamfor = teamfor, teamagainst = teamagainst, goals = goals, 
+						       assists = assists, points = points, plus_minus = plus_minus, pim = pim, goals_ev = goals_ev, 
+						       goals_pp = goals_pp, goals_sh = goals_sh, gw = gw, assists_ev = assists_ev, assists_pp = assists_pp, 
+						       assists_sh = assists_sh, shots = shots, shot_percentage = shot_percentage, shifts = shifts, toi = toi)) 
 	return(skaterlist, teamgoals, teampim, teamshots)
 		
 def parseAdvanced(soup, teamname, gameid, ahoflag):
@@ -477,7 +494,8 @@ def parseAdvanced(soup, teamname, gameid, ahoflag):
 			blocks = int(cols[9])
 		else:
 			blocks = 0	
-		advancedlist.append(nhltuples.AdvancedStats(name = name, gameid = gameid, icf = icf, satf = satf, sata = sata, cfpct = cfpct, crel = crel, zso = zso, zsd = zsd, ozspct = ozspct, hits = hits, blocks = blocks))
+		advancedlist.append(nhltuples.AdvancedStats(name = name, gameid = gameid, icf = icf, satf = satf, sata = sata, cfpct = cfpct, crel = crel, 
+							    zso = zso, zsd = zsd, ozspct = ozspct, hits = hits, blocks = blocks))
 	return advancedlist
 
 def parseGoalies(soup, teamname, gameid, teamagainst, ahoflag):
@@ -512,7 +530,8 @@ def parseGoalies(soup, teamname, gameid, teamagainst, ahoflag):
 		toi = string_to_seconds(toi)
 		teamname = teamname
 		teamagainst = teamagainst
-		goalielist.append(nhltuples.GoalieGame(name = name, gameid = gameid, teamfor = teamname, teamagainst = teamagainst, result = result, ga = ga, sa = sa, sv = sv, sv_pct = sv_pct, so = so, pim = pim, toi = toi))
+		goalielist.append(nhltuples.GoalieGame(name = name, gameid = gameid, teamfor = teamname, teamagainst = teamagainst, result = result, 
+						       ga = ga, sa = sa, sv = sv, sv_pct = sv_pct, so = so, pim = pim, toi = toi))
 	return goalielist
 		  
 def rewriteFiles(datadir):
@@ -555,7 +574,11 @@ def season_stats_to_sql(seasonendyear):
 		cur = conn.cursor()
 
 		# insert and get team ids
-		insertplayersseasonq = """INSERT INTO PlayerSeasons(PlayerID, SeasonEndYear, FullName, Age, Goalie, Defender, Center, LeftWing, RightWing, TeamID, GP, Goals, Assists, Points, PlusMinus, PIM, PointShares, Goals_ev, Goals_pp, Goals_sh, GW, Assists_ev, Assists_pp, Assists_sh, Shots, SHpct, TOI, ATOI, Blocks, Hits, FOW, FOL, FOpct) VALUES(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s) ON DUPLICATE KEY UPDATE TeamID = TeamID;"""
+		insertplayersseasonq = """INSERT INTO PlayerSeasons(PlayerID, SeasonEndYear, FullName, Age, Goalie, Defender, Center, LeftWing, RightWing, 
+		TeamID, GP, Goals, Assists, Points, PlusMinus, PIM, PointShares, Goals_ev, Goals_pp, Goals_sh, GW, Assists_ev, Assists_pp, Assists_sh, Shots, 
+		SHpct, TOI, ATOI, Blocks, Hits, FOW, FOL, FOpct) 
+		VALUES(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s) 
+		ON DUPLICATE KEY UPDATE TeamID = TeamID;"""
 		csvfile = 'CSVdata/{}/season_stats.csv'.format(seasonendyear)
 		df = pd.read_csv(csvfile)
 		# convert pd.nan to None
@@ -692,7 +715,8 @@ def draftkingsToSql(df):
 				teamagainstid = hometeamid
 			# insert into draftkings
 			# PlayerName, HomeTeamID, AwayTeamID, TeamForID, TeamAgainstID, GameDate, PlayerDraftKingsID, DraftKingsName, Position, RosterPosition
-			cur.execute(nhlqueries.insertdraftkingsq,(player, hometeamid, awayteamid, teamforid, teamagainstid, gamedate, row['ID'], row['Salary'], row['Position'], row['Roster Position']))
+			cur.execute(nhlqueries.insertdraftkingsq,(player, hometeamid, awayteamid, teamforid, teamagainstid, gamedate, row['ID'], 
+								  row['Salary'], row['Position'], row['Roster Position']))
 			conn.commit()
 	except mdb.Error, e:
 		print(e)
