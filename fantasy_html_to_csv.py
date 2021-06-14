@@ -61,13 +61,22 @@ def parseSoup(soup, gameid, firstid):
 	writeToCSV('goals.csv', goallist, ['goal', 'gameid', 'assist', 'assist2', 'time', 'period', 'teamfor', 'situation'], gameid, True, firstid=firstid) 
 	writeToCSV('shootouts.csv', shootoutlist, ['gameid', 'shooter', 'goalie', 'goal'], gameid, True, firstid=firstid)
 	writeToCSV('penalties.csv', penaltylist, ['player', 'gameid', 'minutes', 'reason', 'time', 'period', 'teampenalised'], gameid, True, firstid=firstid)
-	writeToCSV('skaters.csv', awayskaterlist, ['name', 'gameid', 'teamfor', 'teamagainst', 'goals','assists', 'points', 'plus_minus', 'pim', 'goals_ev', 'goals_pp', 'goals_sh','gw', 'assists_ev', 'assists_pp', 'assists_sh', 'shots', 'shot_percentage', 'shifts', 'toi'], gameid, True, firstid=firstid)
-	writeToCSV('skaters.csv', homeskaterlist, ['name', 'gameid', 'teamfor', 'teamagainst', 'goals','assists', 'points', 'plus_minus', 'pim', 'goals_ev', 'goals_pp', 'goals_sh', 'gw', 'assists_ev', 'assists_pp', 'assists_sh', 'shots', 'shot_percentage', 'shifts', 'toi'], gameid, False, firstid=firstid)
-	writeToCSV('advanced.csv', awayadvancedlist, ['name',  'gameid', 'icf', 'satf', 'sata', 'cfpct', 'crel', 'zso', 'zsd', 'ozspct', 'hits', 'blocks'], gameid, True, firstid = firstid)
-	writeToCSV('advanced.csv', homeadvancedlist, ['name',  'gameid', 'icf', 'satf', 'sata', 'cfpct', 'crel', 'zso', 'zsd', 'ozspct', 'hits', 'blocks'], gameid, False, firstid = firstid)
-	writeToCSV('goalies.csv', awaygoalielist, ['name', 'gameid', 'teamfor', 'teamagainst', 'result', 'ga', 'sa', 'sv', 'sv_pct', 'so', 'pim', 'toi'], gameid, True, firstid = firstid)
-	writeToCSV('goalies.csv', homegoalielist, ['name', 'gameid', 'teamfor', 'teamagainst', 'result', 'ga', 'sa', 'sv', 'sv_pct', 'so', 'pim', 'toi'], gameid, False, firstid = firstid)
-	writeToCSV('gameinfo.csv', [gameinfo], ['gameid', 'away', 'home', 'date', 'attendance', 'arena', 'duration', 'awayscore', 'homescore', 'OT', 'SO'], gameid, True, firstid = firstid)
+	writeToCSV('skaters.csv', awayskaterlist, ['name', 'gameid', 'teamfor', 'teamagainst', 'goals','assists', 'points', 'plus_minus', 'pim', 'goals_ev', 
+						   'goals_pp', 'goals_sh','gw', 'assists_ev', 'assists_pp', 'assists_sh', 'shots', 'shot_percentage', 'shifts', 'toi'],
+		   gameid, True, firstid=firstid)
+	writeToCSV('skaters.csv', homeskaterlist, ['name', 'gameid', 'teamfor', 'teamagainst', 'goals','assists', 'points', 'plus_minus', 'pim', 'goals_ev', 'goals_pp', 
+						   'goals_sh', 'gw', 'assists_ev', 'assists_pp', 'assists_sh', 'shots', 'shot_percentage', 'shifts', 'toi'], 
+		   gameid, False, firstid=firstid)
+	writeToCSV('advanced.csv', awayadvancedlist, ['name',  'gameid', 'icf', 'satf', 'sata', 'cfpct', 'crel', 'zso', 'zsd', 'ozspct', 'hits', 'blocks'], 
+		   gameid, True, firstid = firstid)
+	writeToCSV('advanced.csv', homeadvancedlist, ['name',  'gameid', 'icf', 'satf', 'sata', 'cfpct', 'crel', 'zso', 'zsd', 'ozspct', 'hits', 'blocks'], 
+		   gameid, False, firstid = firstid)
+	writeToCSV('goalies.csv', awaygoalielist, ['name', 'gameid', 'teamfor', 'teamagainst', 'result', 'ga', 'sa', 'sv', 'sv_pct', 'so', 'pim', 'toi'], 
+		   gameid, True, firstid = firstid)
+	writeToCSV('goalies.csv', homegoalielist, ['name', 'gameid', 'teamfor', 'teamagainst', 'result', 'ga', 'sa', 'sv', 'sv_pct', 'so', 'pim', 'toi'], 
+		   gameid, False, firstid = firstid)
+	writeToCSV('gameinfo.csv', [gameinfo], ['gameid', 'away', 'home', 'date', 'attendance', 'arena', 'duration', 'awayscore', 'homescore', 'OT', 'SO'], 
+		   gameid, True, firstid = firstid)
 
 def writeToCSV(filename, mylist, header, gameid, firsttype = False, folder = 'CSVdata/2018/', firstid = 1):
 	print('writing to {}'.format(folder+filename))
@@ -180,7 +189,8 @@ def parseScoring(soup):
 			if len(wordlist) > 2:
 				re_and = re.search(' and ', wordlist[2])
 				secondaryassist = wordlist[2][re_and.end():]
-			goallist.append(nhltuples.Goal(goal = goalscorer, gameid = gameid, assist = primaryassist, assist2 = secondaryassist, time = goaltime, period = period, teamfor = teamfor, situation = situation))
+			goallist.append(nhltuples.Goal(goal = goalscorer, gameid = gameid, assist = primaryassist, assist2 = secondaryassist, time = goaltime, 
+						       period = period, teamfor = teamfor, situation = situation))
 	return goallist, shootoutlist, OT, SO
 	
 def parseShootout(row, gameid):
@@ -271,7 +281,10 @@ def parseSkaters(soup, teamname, gameid, teamagainst):
 #		print(name)
 		# find block shots
 		
-		skaterlist.append(nhltuples.PlayerGame(name = name, gameid = gameid, teamfor = teamfor, teamagainst = teamagainst, goals = goals, assists = assists, points = points, plus_minus = plus_minus, pim = pim, goals_ev = goals_ev, goals_pp = goals_pp, goals_sh = goals_sh, gw = gw, assists_ev = assists_ev, assists_pp = assists_pp, assists_sh = assists_sh, shots = shots, shot_percentage = shot_percentage, shifts = shifts, toi = toi)) 
+		skaterlist.append(nhltuples.PlayerGame(name = name, gameid = gameid, teamfor = teamfor, teamagainst = teamagainst, goals = goals, 
+						       assists = assists, points = points, plus_minus = plus_minus, pim = pim, goals_ev = goals_ev, 
+						       goals_pp = goals_pp, goals_sh = goals_sh, gw = gw, assists_ev = assists_ev, assists_pp = assists_pp, 
+						       assists_sh = assists_sh, shots = shots, shot_percentage = shot_percentage, shifts = shifts, toi = toi)) 
 	return(skaterlist, teamgoals)
 		
 def parseAdvanced(soup, teamname, gameid):
@@ -307,7 +320,8 @@ def parseAdvanced(soup, teamname, gameid):
 		ozspct = cols[7]
 		hits = cols[8]
 		blocks = cols[9]
-		advancedlist.append(nhltuples.AdvancedStats(name = name, gameid = gameid, icf = icf, satf = satf, sata = sata, cfpct = cfpct, crel = crel, zso = zso, zsd = zsd, ozspct = ozspct, hits = hits, blocks = blocks))
+		advancedlist.append(nhltuples.AdvancedStats(name = name, gameid = gameid, icf = icf, satf = satf, sata = sata, cfpct = cfpct, crel = crel, 
+							    zso = zso, zsd = zsd, ozspct = ozspct, hits = hits, blocks = blocks))
 	return advancedlist
 
 def parseGoalies(soup, teamname, gameid, teamagainst):
@@ -332,7 +346,8 @@ def parseGoalies(soup, teamname, gameid, teamagainst):
 		toi = cols[8]
 		teamname = teamname
 		teamagainst = teamagainst
-		goalielist.append(nhltuples.GoalieGame(name = name, gameid = gameid, teamfor = teamname, teamagainst = teamagainst, result = result, ga = ga, sa = sa, sv = sv, sv_pct = sv_pct, so = so, pim = pim, toi = toi))
+		goalielist.append(nhltuples.GoalieGame(name = name, gameid = gameid, teamfor = teamname, teamagainst = teamagainst, result = result, 
+						       ga = ga, sa = sa, sv = sv, sv_pct = sv_pct, so = so, pim = pim, toi = toi))
 	return goalielist
 		  
 def rewriteFiles(dataloc):
