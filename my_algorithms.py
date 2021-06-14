@@ -19,7 +19,8 @@ import genetic_algo
 pd.set_option('display.max_columns', 500)
 #pd.set_option('display.max_rows', 1000)
 
-def point_function(position, goals, assists, sog, bs, shp, shootout, win, saves,ga, shutout, coef_arr_player = np.array([3,2,0.5,0.5,1,0.2,1.5] ), coef_arr_goalie = np.array([3,0.2,1,2])):
+def point_function(position, goals, assists, sog, bs, shp, shootout, win, saves,ga, shutout, coef_arr_player = np.array([3,2,0.5,0.5,1,0.2,1.5] ), 
+		   coef_arr_goalie = np.array([3,0.2,1,2])):
 	if goals >= 3:
 		hattrick = 1
 	else:
@@ -204,7 +205,9 @@ def compile_data_prevgames(dfplayers, prevgames, folder, label = '', test = Fals
 		dfmyplayer = dfplayers[dfplayers['name'] == myplayer]
 	#	dfmyplayer = dfmyplayer.iloc[-prevgames:]
 		# calculate fantasy points
-		dfmyplayer['fantasy_pts'] = dfmyplayer.apply(lambda row: point_function('notgoalie', row['goals'], row['assists'], row['shots'], row['blocks'], row['goals_sh'] + row['assists_sh'], row['goal'], 0, 0, 0, 0), axis = 1) 
+		dfmyplayer['fantasy_pts'] = dfmyplayer.apply(lambda row: point_function('notgoalie', row['goals'], row['assists'], row['shots'], 
+											row['blocks'], row['goals_sh'] + row['assists_sh'], 
+											row['goal'], 0, 0, 0, 0), axis = 1) 
 		# fantasy points for all matches except the first
 		fpts = dfmyplayer['fantasy_pts']
 		# calculate averages without last row
@@ -412,13 +415,15 @@ def predict_ridge(dfplayers, listids, position, datadivision, myseed, rangegames
 	if position == 'G':
 		predictcols = ['win', 'save_pct', 'ga', 'so', 'sa', 'myteamgoalsfor', 'myteamgoalsagainst', 'oppgoalsfor', 'oppgoalsagainst']
 	else:
-		predictcols = ['goals', 'assists', 'shots', 'blocks', 'goals_sh', 'goal', 'hits', 'satf', 'sata', 'zso', 'zsd', 'toi', 'myteamgoalsfor', 'myteamgoalsagainst', 'oppgoalsfor', 'oppgoalsagainst']
+		predictcols = ['goals', 'assists', 'shots', 'blocks', 'goals_sh', 'goal', 'hits', 'satf', 'sata', 'zso', 'zsd', 'toi', 'myteamgoalsfor', 
+			       'myteamgoalsagainst', 'oppgoalsfor', 'oppgoalsagainst']
 	errlist = []
 	if type(rangegames) == type([]):
 		for prevgame in rangegames:
 			print('**************************************')
 			trainplayers = compile_data_prevgames(dfplayers, prevgame, folder = 'CSVdata/2017', label = position)
-			error, alpha, ridge = trainData(trainplayers[trainplayers['pgid'].isin(trainids)], trainplayers[trainplayers['pgid'].isin(validids)], position = position, colnames = predictcols)
+			error, alpha, ridge = trainData(trainplayers[trainplayers['pgid'].isin(trainids)], trainplayers[trainplayers['pgid'].isin(validids)], 
+							position = position, colnames = predictcols)
 			# print results 
 			print('finished {}'.format(position))
 			print('the errors for {} for {} games was \n {}'.format(position, prevgame, stats.describe(error, nan_policy = 'omit')))
@@ -436,7 +441,8 @@ def predict_ridge(dfplayers, listids, position, datadivision, myseed, rangegames
 		minerrorindex = smallesterr.index(min(smallesterr))
 		bestgames, besterror, bestalpha, bestridge = errlist[minerrorindex]
 	else:
-		error, alpha, bestridge = trainData(trainplayers[trainplayers['pgid'].isin(trainids)], trainplayers[trainplayers['pgid'].isin(validids)], position = position, colnames = predictcols)
+		error, alpha, bestridge = trainData(trainplayers[trainplayers['pgid'].isin(trainids)], trainplayers[trainplayers['pgid'].isin(validids)], 
+						    position = position, colnames = predictcols)
 		bestgames = rangegames
 		bestalpha = alpha
 
